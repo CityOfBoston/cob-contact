@@ -9,33 +9,10 @@ class SubscribeBot
     puts BOT_HEADERS
   end
 
-  def check_subscriber(profile_id)
-    return Typhoeus::Request.get("#{BOT_BASE_URI}/subscribers/#{profile_id}",
-      userpwd: BOT_AUTH,
-      headers: BOT_HEADERS
-    )
-  end
-
   def resubscribe(profile_id)
     return Typhoeus::Request.get("#{BOT_BASE_URI}/subscribers/#{profile_id}/resubscribe",
       userpwd: BOT_AUTH,
       headers: BOT_HEADERS
-    )
-  end
-
-  def create_subscriber(subscriber)
-    return Typhoeus::Request.post("#{BOT_BASE_URI}/subscribers",
-      userpwd: BOT_AUTH,
-      headers: BOT_HEADERS,
-      body: subscriber.to_xml( :only => [:email, :profile_id, :zipcode] )
-    )
-  end
-
-  def add_subscription(profile_id, list)
-    return Typhoeus::Request.post("#{BOT_BASE_URI}/subscribers/#{profile_id}/subscriptions",
-      userpwd: BOT_AUTH,
-      headers: BOT_HEADERS,
-      body: {subscription: {newsletter_id: list}}.to_xml(root: "subscriptions")
     )
   end
 
@@ -44,5 +21,31 @@ class SubscribeBot
       userpwd: BOT_AUTH,
       headers: BOT_HEADERS
     )
+  end
+
+  def subscribe(subscriber, list)
+    return Typhoeus::Request.post("#{BOT_BASE_URI}/subscribers",
+      userpwd: BOT_AUTH,
+      headers: BOT_HEADERS,
+      body: build_subscriber(subscriber, list)
+    )
+  end
+
+  private
+
+  def build_subscriber(subscriber, list)
+    subscriber = {
+      email: subscriber.email,
+      zip_code: subscriber.zipcode,
+      subscriptions: {
+        subscription: {
+          newsletter_id: list
+        }
+      },
+      existing_update: "true"
+    }
+
+    puts subscriber.to_xml(root: "subscriber")
+    return subscriber.to_xml(root: "subscriber")
   end
 end
