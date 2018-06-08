@@ -9,6 +9,13 @@ class SubscribeBot
     puts BOT_HEADERS
   end
 
+  def check_subscriber(profile_id)
+    return Typhoeus::Request.get("#{BOT_BASE_URI}/subscribers/#{profile_id}",
+      userpwd: BOT_AUTH,
+      headers: BOT_HEADERS
+    )
+  end
+
   def resubscribe(profile_id)
     return Typhoeus::Request.get("#{BOT_BASE_URI}/subscribers/#{profile_id}/resubscribe",
       userpwd: BOT_AUTH,
@@ -36,7 +43,7 @@ class SubscribeBot
   def build_subscriber(subscriber, list)
     subscriber = {
       email: subscriber.email,
-      zip_code: subscriber.zipcode,
+      zipcode: subscriber.zipcode,
       subscriptions: {
         subscription: {
           newsletter_id: list
@@ -45,7 +52,6 @@ class SubscribeBot
       existing_update: "true"
     }
 
-    puts subscriber.to_xml(root: "subscriber")
     return subscriber.to_xml(root: "subscriber")
   end
 end

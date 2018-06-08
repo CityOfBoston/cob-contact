@@ -8,6 +8,19 @@ class SubscribeWorker
 
     response = bot.subscribe(subscriber, list)
 
-    puts response.to_yaml
+    if response.code == 200
+      subscriber_details = Hash.from_xml(response.body)
+
+      unless subscriber_details["result"]["profile_id"].nil?
+        status_check = bot.check_subscriber(subscriber_details["result"]["profile_id"])
+        status_response = Hash.from_xml(status_check.body)
+
+        unless status_response["subscriber"]["status"]
+          bot.resubscribe(subscriber_details["result"]["profile_id"])
+        end
+
+        subscriber.destroy!
+      end
+    end
   end
 end
